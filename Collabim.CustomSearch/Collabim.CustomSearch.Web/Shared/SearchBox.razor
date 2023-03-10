@@ -1,0 +1,49 @@
+﻿@using Collabim.CustomSearch.Business
+
+@inject ISearchService SearchService
+
+
+<div class="w-100" style="height:40px;">
+   <input id="searchTextInput" title="Type text to search" placeholder="Type text to search"
+          class="col-12 col-sm-8 col-md-6 col-lg-4 h-100 border border-1 rounded-pill text-center"
+          @bind="SearchText" @bind:event="oninput" @onkeydown="@OnSearchTextKeyDown" />
+
+   <button id="searchButton" type="button" class="btn btn-primary h-100"
+           @onclick="OnSearchClick">
+           @if(_loading){
+               <span class="spinner-border spinner-border-sm"></span>
+           }
+      Search     
+   </button>
+</div>
+
+@code {
+
+
+   [Parameter]
+   public string SearchText { get; set; } = string.Empty;
+
+   private bool _loading = false;
+
+   protected override async Task OnInitializedAsync()
+   {
+   }
+
+   [Parameter] public EventCallback<string> OnSearchClickevent { get; set; }
+
+   private async Task OnSearchClick()
+   {
+      _loading = true;
+      await OnSearchClickevent.InvokeAsync(SearchText);
+      _loading = false;
+   }
+
+   public void OnSearchTextKeyDown(KeyboardEventArgs e)
+   {
+      if (e.Code == "Enter" || e.Code == "NumpadEnter")
+      {
+         OnSearchClick();
+      }
+   }
+  
+}
