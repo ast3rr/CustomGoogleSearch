@@ -1,21 +1,30 @@
 ﻿@using Collabim.CustomSearch.Business
 
 @inject ISearchService SearchService
+@inject IJSRuntime JSRuntime
 
+<div class="w-100">
+   <div class="p-3">
+      <h1>Custom Search</h1>
+   </div>
 
-<div class="w-100" style="height:40px;">
-   <input id="searchTextInput" title="Type text to search" placeholder="Type text to search"
-          class="col-12 col-sm-8 col-md-6 col-lg-4 h-100 border border-1 rounded-pill text-center"
-          @bind="SearchText" @bind:event="oninput" @onkeydown="@OnSearchTextKeyDown" />
+   <div class="mb-3">
+      <input id="searchTextInput" title="" placeholder="" autocomplete="on"
+             class="col-12 col-sm-8 col-md-6 col-lg-4 h-100 mb-1 border border-1 rounded-pill text-center me-3 h-40"
+             @bind="SearchText" @bind:event="oninput" @onkeydown="@OnSearchTextKeyDown" />
 
-   <button id="searchButton" type="button" class="btn btn-primary h-100"
-           @onclick="OnSearchClick">
-           @if(_loading){
-               <span class="spinner-border spinner-border-sm"></span>
-           }
-      Search     
-   </button>
+      <button id="searchButton" type="button" class="btn btn-primary h-100 col-12 col-sm-3 col-md-3 col-lg-3 col-xl-2"
+              @onclick="OnSearchClick">
+         @if (_loading)
+         {
+            <span class="spinner-border spinner-border-sm"></span>
+         }
+         Search
+      </button>
+   </div>
+
 </div>
+
 
 @code {
 
@@ -25,8 +34,12 @@
 
    private bool _loading = false;
 
-   protected override async Task OnInitializedAsync()
+   protected override async Task OnAfterRenderAsync(bool firstRender)
    {
+      if (firstRender)
+      {
+         await Focus("searchTextInput");
+      }
    }
 
    [Parameter] public EventCallback<string> OnSearchClickevent { get; set; }
@@ -34,16 +47,23 @@
    private async Task OnSearchClick()
    {
       _loading = true;
+     
       await OnSearchClickevent.InvokeAsync(SearchText);
+     
       _loading = false;
    }
 
-   public void OnSearchTextKeyDown(KeyboardEventArgs e)
+   public async Task OnSearchTextKeyDown(KeyboardEventArgs e)
    {
       if (e.Code == "Enter" || e.Code == "NumpadEnter")
       {
-         OnSearchClick();
+         await OnSearchClick();
       }
+   }
+
+   public async Task Focus(string elementId)
+   {
+      await JSRuntime.InvokeVoidAsync("jsfunction.focusElement", elementId);
    }
   
 }

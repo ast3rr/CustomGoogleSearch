@@ -1,11 +1,17 @@
 using Collabim.CustomSearch.Business;
+using Collabim.CustomSearch.Business.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.AddConsole();
+
 // Add services to the container.
+builder.Services.AddLogging(configure => { configure.ClearProviders(); configure.AddConsole(); });
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddScoped<ISearchService, SearchService>();
+builder.Services.AddScoped<ISearchService, SearchService>(x =>
+	new SearchService(builder.Configuration.GetValue<string>("ApiKey"), builder.Configuration.GetValue<string>("SearchEngineId")));
+builder.Services.AddScoped<ICsvGeneratorHelper, CsvGeneratorHelper>();
 
 var app = builder.Build();
 

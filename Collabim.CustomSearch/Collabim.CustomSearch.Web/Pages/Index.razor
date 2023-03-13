@@ -1,44 +1,63 @@
 ﻿@page "/"
 
-<PageTitle>Collabim Custom Search</PageTitle>
+<PageTitle>Custom Search</PageTitle>
 
 @using Collabim.CustomSearch.Business
-@using Google.Apis.Customsearch.v1.Data
+@using Collabim.CustomSearch.Business.Helpers
+@using Collabim.CustomSearch.Business.Models
 @inject ISearchService SearchService
+@inject ICsvGeneratorHelper CsvGeneratorHelper
+@inject IJSRuntime JSRuntime
+@*@inject ILogger Logger*@
 
 
 
-<div class="@_cssClass">
-   <SearchBox OnSearchClickevent="OnSearchClick"></SearchBox>
-</div>
+<div class="container">
+  <div class="row">
 
-@if (_searchItems != null && _searchItems.Count > 0)
-{
-   <div>      
-         @foreach (var item in _searchItems)
-         {
-            <div>
-            @if (item.Pagemap != null && item.Pagemap.ContainsKey(""))
-            {
-               @*<div>@((MarkupString)item.Pagemap</div>*@
-            }
-               <div><a href="@((MarkupString)item.Link)" target="_blank">@((MarkupString)item.HtmlTitle)</a></div>
-               <div>@((MarkupString)item.Link)</div>
-               <div>@((MarkupString)item.HtmlSnippet)</div>              
-            </div>
-            <br />
-         }      
+      <div class="@_cssClass">
+         <SearchBox OnSearchClickevent="OnSearchClick"></SearchBox>   
+      </div>
+
+      @if (_searchItems != null && _searchItems.Count() > 0)
+      {
+         <div class="d-flex justify-content-end pb-2">
+            <button id="exportButton" type="button" class="btn btn-sm btn-outline-secondary"
+                 @onclick="OnExportClick">
+               <i class="bi bi-save"></i>
+               Save as a CSV
+            </button>
+         </div>
+
+         <div class="ps-5 pe-5">      
+               @foreach (var item in _searchItems)
+               {
+               <div class="pb-5">
+                     <div><a href="@((MarkupString)item.Link)" target="_blank">@((MarkupString)item.HtmlTitle)</a></div>
+                     <div>@((MarkupString)item.Link)</div>
+                     <div>@((MarkupString)item.HtmlSnippet)</div>
+                  @if (!string.IsNullOrWhiteSpace(item.ImageSrc))
+                  {
+                     <div>
+                        <img src="@item.ImageSrc" />
+                     </div>
+                  }
+               </div>           
+               }      
+         </div>
+      }
+
    </div>
-}
+</div>
 
 @code {
 
-   private IList<Result> _searchItems;
+   private IEnumerable<SearchItem> _searchItems = new List<SearchItem>();
    private string _cssClass = string.Empty;
 
    protected override async Task OnInitializedAsync()
    {
-       SetCssClass();
+      await Task.Run(() => SetCssClass());
    }  
 
    private async Task OnSearchClick(string searchText)
@@ -49,24 +68,39 @@
          {
             _searchItems = await SearchService.SearchAsync(searchText);
          }
-         catch
+         catch(Exception ex)
          {
-            // log
+            //Logger.LogError(ex.Message);
          }
 
          SetCssClass();
       }
    }
 
+   private async Task OnExportClick()
+   {
+      @if (_searchItems != null && _searchItems.Count() > 0)
+      {
+
+         var csv = CsvGeneratorHelper.GenerateData(_searchItems);
+
+         await JSRuntime.InvokeAsync<object>(
+              "FileSaveAs",
+              "searchresult.csv",
+              csv
+          );
+      }
+   }
+
    private void SetCssClass()
    {
-      if (_searchItems == null || _searchItems.Count == 0)
+      if (_searchItems == null || _searchItems.Count() == 0)
       {
          _cssClass = "d-flex align-items-center text-center vh-100";
       }
       else
       {
-         _cssClass = "pt-5 ps-5 pb-5";
+         _cssClass = "pt-5 pb-2";
       }
    }
 }
