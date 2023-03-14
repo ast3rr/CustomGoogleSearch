@@ -4,9 +4,10 @@
 
 @using Collabim.CustomSearch.Business
 @using Collabim.CustomSearch.Business.Helpers
+@using Collabim.CustomSearch.Business.Interfaces
 @using Collabim.CustomSearch.Business.Models
 @inject ISearchService SearchService
-@inject ICsvGeneratorHelper CsvGeneratorHelper
+@inject IDataExporter CsvGeneratorHelper
 @inject IJSRuntime JSRuntime
 @*@inject ILogger Logger*@
 
@@ -21,7 +22,7 @@
 
       @if (_searchItems != null && _searchItems.Count() > 0)
       {
-         <div class="d-flex justify-content-end pb-2">
+         <div class="d-flex justify-content-end pb-2 pe-5">
             <button id="exportButton" type="button" class="btn btn-sm btn-outline-secondary"
                  @onclick="OnExportClick">
                <i class="bi bi-save"></i>
@@ -82,7 +83,7 @@
       @if (_searchItems != null && _searchItems.Count() > 0)
       {
 
-         var csv = CsvGeneratorHelper.GenerateData(_searchItems);
+         var csv = CsvGeneratorHelper.Export(_searchItems);
 
          await JSRuntime.InvokeAsync<object>(
               "FileSaveAs",

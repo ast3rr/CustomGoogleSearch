@@ -1,22 +1,18 @@
-﻿using System.Text;
+﻿using Collabim.CustomSearch.Business.Interfaces;
+using System.Text;
 
 namespace Collabim.CustomSearch.Business.Helpers
 {
-	public interface ICsvGeneratorHelper
-	{
-		string GenerateData<T>(IEnumerable<T> data) where T : class, new();
-	}
-
-	public class CsvGeneratorHelper : ICsvGeneratorHelper
+	public class CsvExporter : IDataExporter
 	{
 		private readonly string _separator;
 
-		public CsvGeneratorHelper()
+		public CsvExporter()
 		{
-			this._separator = ";";
+			_separator = ";";
 		}
 
-		public string GenerateData<T>(IEnumerable<T> data) where T : class, new()
+		public string Export<T>(IEnumerable<T> data) where T : class, new()
 		{
 			var sb = new StringBuilder();
 
@@ -26,7 +22,7 @@ namespace Collabim.CustomSearch.Business.Helpers
 
 			foreach (var item in data)
 			{
-				var items = (properties.Select(p => (p.GetValue(item, null) ?? string.Empty).ToString())).ToArray();
+				var items = properties.Select(p => (p.GetValue(item, null) ?? string.Empty).ToString()).ToArray();
 
 				for (int i = 0; i < items.Length; i++)
 				{
