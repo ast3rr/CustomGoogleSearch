@@ -2,14 +2,10 @@
 
 <PageTitle>Custom Search</PageTitle>
 
-@using Collabim.CustomSearch.Business
-@using Collabim.CustomSearch.Business.Helpers
-@using Collabim.CustomSearch.Business.Interfaces
-@using Collabim.CustomSearch.Business.Models
 @inject ISearchService SearchService
 @inject IDataExporter CsvGeneratorHelper
 @inject IJSRuntime JSRuntime
-@*@inject ILogger Logger*@
+@inject ILogger<Index> Logger
 
 
 
@@ -71,7 +67,7 @@
          }
          catch(Exception ex)
          {
-            //Logger.LogError(ex.Message);
+            Logger.LogError(ex.Message);
          }
 
          SetCssClass();

@@ -5,10 +5,7 @@ using Collabim.CustomSearch.Business.Mapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Logging.AddConsole();
-
 // Add services to the container.
-builder.Services.AddLogging(configure => { configure.ClearProviders(); configure.AddConsole(); });
 builder.Services.AddAutoMapper(typeof(CustomSearchMapProfile));
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
